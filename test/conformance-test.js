@@ -1,17 +1,13 @@
-var should = require('should')
-  , async = require('async')
-  , assert = require('assert')
-  , Stream = require('stream').Stream
-  , streamAssert = require('stream-assert')
+var should = require('should'),
+  async = require('async'),
+  assert = require('assert'),
+  Stream = require('stream').Stream,
+  streamAssert = require('stream-assert')
 
-function noop() {
-
-}
+function noop() {}
 
 module.exports = function(name, engineFactory) {
-
   describe(name, function() {
-
     describe('#set()', function() {
       it('should not allow undefined key', function(done) {
         var cache = engineFactory()
@@ -20,7 +16,6 @@ module.exports = function(name, engineFactory) {
           err.should.have.property('message', 'Invalid key undefined')
           done()
         })
-
       })
 
       it('should allow primitives to be set', function(done) {
@@ -31,33 +26,31 @@ module.exports = function(name, engineFactory) {
           assert.equal(value, 'hello')
           done()
         })
-
       })
 
-      it('should treat keys with spaces and keys with _ differently', function (done) {
-        var cache = engineFactory()
-          , tasks =
-              { setKeyWithSpace: function (cb) {
-                  cache.set('key key', 'hello one', cb)
-                }
-              , setKeyWithDelimiter: function (cb) {
-                  cache.set('key_key', 'hello two', cb)
-                }
-              , getKeyWithSpace: function (cb) {
-                  cache.get('key key', cb)
-                }
-              , getKeyWithDelimiter: function (cb) {
-                  cache.get('key_key', cb)
-                }
-              }
+      it('should treat keys with spaces and keys with _ differently', function(done) {
+        var cache = engineFactory(),
+          tasks = {
+            setKeyWithSpace: function(cb) {
+              cache.set('key key', 'hello one', cb)
+            },
+            setKeyWithDelimiter: function(cb) {
+              cache.set('key_key', 'hello two', cb)
+            },
+            getKeyWithSpace: function(cb) {
+              cache.get('key key', cb)
+            },
+            getKeyWithDelimiter: function(cb) {
+              cache.get('key_key', cb)
+            }
+          }
 
-        async.series(tasks, function (err, results) {
+        async.series(tasks, function(err, results) {
           assert.ok(!err)
           assert.equal(results.getKeyWithSpace, 'hello one')
           assert.equal(results.getKeyWithDelimiter, 'hello two')
           done()
         })
-
       })
 
       it('should allow objects to be set', function(done) {
@@ -68,18 +61,20 @@ module.exports = function(name, engineFactory) {
           assert.deepEqual(value, { a: 1 })
           done()
         })
-
       })
 
       it('should not allow circular objects', function(done) {
-        var cache = engineFactory()
-          , circular = []
+        var cache = engineFactory(),
+          circular = []
 
         circular.push(circular)
 
         cache.set('key', circular, function(err) {
           err.should.be.instanceOf(TypeError)
-          err.should.have.property('message', 'Converting circular structure to JSON')
+          err.should.have.property(
+            'message',
+            'Converting circular structure to JSON'
+          )
 
           cache.get('key', function(err, value) {
             should.equal(value, undefined)
@@ -89,25 +84,31 @@ module.exports = function(name, engineFactory) {
       })
 
       describe('Streaming Interface', function() {
-
         it('should return a WriteStream without data or callback', function() {
-          var cache = engineFactory()
-            , cacheStream = cache.set('key')
+          var cache = engineFactory(),
+            cacheStream = cache.set('key')
 
           assert.ok(cacheStream instanceof Stream, 'should be a Stream')
-
         })
 
         it('should allow primitives to be sent to WriteStream', function(done) {
-          var cache = engineFactory()
-            , cacheStream = cache.set('key')
+          var cache = engineFactory(),
+            cacheStream = cache.set('key')
 
           cacheStream
-            .pipe(streamAssert.first(function(data) { assert.equal(data, 'hello') }))
-            .pipe(streamAssert.second(function(data) { assert.equal(data, 'world') }))
+            .pipe(
+              streamAssert.first(function(data) {
+                assert.equal(data, 'hello')
+              })
+            )
+            .pipe(
+              streamAssert.second(function(data) {
+                assert.equal(data, 'world')
+              })
+            )
             .end(function() {
               cache.get('key', function(err, data) {
-                assert.deepEqual(data, [ 'hello', 'world' ])
+                assert.deepEqual(data, ['hello', 'world'])
                 done()
               })
             })
@@ -118,15 +119,23 @@ module.exports = function(name, engineFactory) {
         })
 
         it('should allow objects to set to WriteStream', function(done) {
-          var cache = engineFactory()
-            , cacheStream = cache.set('key')
+          var cache = engineFactory(),
+            cacheStream = cache.set('key')
 
           cacheStream
-            .pipe(streamAssert.first(function(data) { assert.equal(data, 'hello') }))
-            .pipe(streamAssert.second(function(data) { assert.equal(data, 'world') }))
+            .pipe(
+              streamAssert.first(function(data) {
+                assert.equal(data, 'hello')
+              })
+            )
+            .pipe(
+              streamAssert.second(function(data) {
+                assert.equal(data, 'world')
+              })
+            )
             .end(function() {
               cache.get('key', function(err, data) {
-                assert.deepEqual(data, [ { a: 1 }, { b: 2 } ])
+                assert.deepEqual(data, [{ a: 1 }, { b: 2 }])
                 done()
               })
             })
@@ -137,9 +146,9 @@ module.exports = function(name, engineFactory) {
         })
 
         it('should error if given circular objects', function(done) {
-          var cache = engineFactory()
-            , cacheStream = cache.set('key')
-            , circular = []
+          var cache = engineFactory(),
+            cacheStream = cache.set('key'),
+            circular = []
 
           circular.push(circular)
 
@@ -151,13 +160,10 @@ module.exports = function(name, engineFactory) {
           cacheStream.write(circular)
           cacheStream.end()
         })
-
       })
-
     })
 
     describe('#get()', function() {
-
       it('should emit a "miss" event on cache misses', function(done) {
         var cache = engineFactory()
 
@@ -166,13 +172,13 @@ module.exports = function(name, engineFactory) {
           done()
         })
 
-        cache.get('undefined', function() { })
+        cache.get('undefined', function() {})
       })
 
       it('should return undefined on cache miss', function(done) {
         var cache = engineFactory()
 
-        cache.get('undefined', function (err, value) {
+        cache.get('undefined', function(err, value) {
           assert.strictEqual(err, null, 'err should be null')
           assert.strictEqual(value, undefined, 'value should be undefined')
           done()
@@ -182,7 +188,7 @@ module.exports = function(name, engineFactory) {
       it('should emit a "stale" on an expired cache', function(done) {
         var cache = engineFactory()
 
-        cache.on('stale', function (key, value, ttl) {
+        cache.on('stale', function(key, value, ttl) {
           key.should.equal('abc')
           value.should.equal('hello')
           ttl.should.be.below(Date.now())
@@ -234,7 +240,7 @@ module.exports = function(name, engineFactory) {
       it('should not return a value for a key that has been deleted', function(done) {
         var cache = engineFactory()
         cache.set('test', 'hello', function() {
-          cache.delete('test', function () {
+          cache.delete('test', function() {
             cache.get('test', function(error, value) {
               should.equal(value, undefined)
               done()
@@ -268,7 +274,6 @@ module.exports = function(name, engineFactory) {
     })
 
     describe('#delete()', function() {
-
       it('should not error if key does not exist', function() {
         var cache = engineFactory()
         cache.delete('')
@@ -277,43 +282,45 @@ module.exports = function(name, engineFactory) {
       it('should reduce size of cache', function(done) {
         var cache = engineFactory()
         async.series(
-          [ cache.set.bind(cache, 'a', 1)
-          , function(cb) {
+          [
+            cache.set.bind(cache, 'a', 1),
+            function(cb) {
               cache.size(function(error, size) {
                 size.should.eql(1)
                 cb()
               })
-            }
-          , cache.delete.bind(cache, 'a')
-          , function(cb) {
+            },
+            cache.delete.bind(cache, 'a'),
+            function(cb) {
               cache.size(function(error, size) {
                 size.should.eql(0)
                 cb()
               })
             }
-        ], function() {
-          done()
-        })
+          ],
+          function() {
+            done()
+          }
+        )
       })
 
       it('should emit a "delete" on delete', function(done) {
         var cache = engineFactory()
 
-        cache.on('delete', function (key) {
+        cache.on('delete', function(key) {
           key.should.equal('jim')
           done()
         })
 
         cache.delete('jim')
       })
-
     })
 
     describe('#clear()', function() {
       it('should emit a "clear" on clear', function(done) {
         var cache = engineFactory()
 
-        cache.once('clear', function () {
+        cache.once('clear', function() {
           done()
         })
 

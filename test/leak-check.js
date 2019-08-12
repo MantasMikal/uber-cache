@@ -1,9 +1,9 @@
-var UberCache = require('../uber-cache')
-  , cache = new UberCache()
-  , i = 0
-  , buf = ''
-  , last = process.memoryUsage().rss
-  , current = process.memoryUsage().rss
+var UberCache = require('../uber-cache'),
+  cache = new UberCache(),
+  i = 0,
+  buf = '',
+  last = process.memoryUsage().rss,
+  current = process.memoryUsage().rss
 
 function outputMemory(i) {
   GLOBAL.gc()

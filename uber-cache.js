@@ -1,9 +1,9 @@
 module.exports = UberCache
 
-var EventEmitter = require('events').EventEmitter,
-  lruCache = require('lru-cache'),
-  extend = require('lodash.assign'),
-  through = require('through')
+var EventEmitter = require('events').EventEmitter
+var LruCache = require('lru-cache')
+var extend = require('lodash.assign')
+var through = require('through')
 
 // V8 prefers predictable objects
 function CachePacket(ttl, data) {
@@ -17,7 +17,7 @@ function CachePacket(ttl, data) {
 function UberCache(options) {
   this.options = extend({ size: 5000 }, options)
 
-  this.cache = lruCache(this.options.size)
+  this.cache = new LruCache(this.options.size)
 }
 
 UberCache.prototype = Object.create(EventEmitter.prototype)
@@ -68,8 +68,8 @@ UberCache.prototype.set = function(key, value, ttl, callback) {
 }
 
 UberCache.prototype.get = function get(key, callback) {
-  var value,
-    cachePacket = this.cache.get(key)
+  var value
+  var cachePacket = this.cache.get(key)
 
   if (typeof cachePacket === 'undefined') {
     this.emit('miss', key)

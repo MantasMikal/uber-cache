@@ -1,7 +1,7 @@
-var async = require('async'),
-  count = 200000,
-  primitiveCache,
-  complexCache
+var async = require('async')
+var count = 200000
+var primitiveCache
+var complexCache
 
 function time(fn) {
   return function(done) {
@@ -14,8 +14,8 @@ function time(fn) {
 
 module.exports = function(name, engineFactory) {
   function populateCachePrimitiveData(done) {
-    var doneCount = 0,
-      cache = engineFactory()
+    var doneCount = 0
+    var cache = engineFactory()
 
     function setDone() {
       doneCount += 1
@@ -30,8 +30,8 @@ module.exports = function(name, engineFactory) {
   }
 
   function populateCacheComplexData(done) {
-    var doneCount = 0,
-      cache = engineFactory()
+    var doneCount = 0
+    var cache = engineFactory()
 
     function setDone() {
       doneCount += 1
@@ -60,8 +60,8 @@ module.exports = function(name, engineFactory) {
         })
       }),
       'cache.get() with empty cache': time(function(done) {
-        var doneCount = 0,
-          cache = engineFactory()
+        var doneCount = 0
+        var cache = engineFactory()
 
         function getDone() {
           doneCount += 1
@@ -103,8 +103,8 @@ module.exports = function(name, engineFactory) {
         }
       }),
       'cache.delete()': time(function(done) {
-        var doneCount = 0,
-          cache = engineFactory()
+        var doneCount = 0
+        var cache = engineFactory()
 
         function delDone() {
           doneCount += 1
@@ -133,7 +133,7 @@ module.exports = function(name, engineFactory) {
         }
       })
     },
-    function(error, times) {
+    function(ignoreError, times) {
       console.log('\nOperation count: ' + count)
       Object.keys(times).forEach(function(key) {
         console.log(rightPad(times[key]) + 'ms ' + key)
